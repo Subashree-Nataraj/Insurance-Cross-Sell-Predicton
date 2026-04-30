@@ -45,43 +45,46 @@ st.markdown("---")
 # ---------------- PREDICTION ----------------
 if st.button("🔮 Predict Response"):
 
-    # Create full input dataframe with zeros
+    # ✅ Step 1: Create empty dataframe with ALL training columns
     input_df = pd.DataFrame(0, index=[0], columns=columns)
 
-    # Fill numerical features
-    input_df["Age"] = age
-    input_df["Region_Code"] = region_code
-    input_df["Previously_Insured"] = previously_insured
-    input_df["Annual_Premium"] = annual_premium
-    input_df["Vintage"] = vintage
-    input_df["Policy_Sales_Channel"] = policy_channel
+    # ✅ Step 2: Fill numeric features
+    input_df.loc[0, "Age"] = age
+    input_df.loc[0, "Previously_Insured"] = previously_insured
+    input_df.loc[0, "Annual_Premium"] = annual_premium
+    input_df.loc[0, "Region_Code"] = region_code
+    input_df.loc[0, "Policy_Sales_Channel"] = policy_channel
+    input_df.loc[0, "Vintage"] = vintage
 
-    # Gender encoding
-    if gender == "Male" and "Gender_Male" in columns:
-        input_df["Gender_Male"] = 1
+    # ✅ Step 3: Handle categorical (VERY IMPORTANT)
+
+    # Gender
+    if "Gender_Male" in columns:
+        input_df.loc[0, "Gender_Male"] = 1 if gender == "Male" else 0
 
     # Vehicle Damage
-    if vehicle_damage == "Yes" and "Vehicle_Damage_Yes" in columns:
-        input_df["Vehicle_Damage_Yes"] = 1
+    if "Vehicle_Damage_Yes" in columns:
+        input_df.loc[0, "Vehicle_Damage_Yes"] = 1 if vehicle_damage == "Yes" else 0
 
-    # Vehicle Age encoding
-    if vehicle_age == "1-2 Year":
-        input_df["Vehicle_Age_1-2 Year"] = 1
-    elif vehicle_age == "> 2 Years":
-        input_df["Vehicle_Age_> 2 Years"] = 1
+    # Vehicle Age
+    if "Vehicle_Age_1-2 Year" in columns:
+        input_df.loc[0, "Vehicle_Age_1-2 Year"] = 1 if vehicle_age == "1-2 Year" else 0
 
-    # ---------------- PREDICTION ----------------
+    if "Vehicle_Age_> 2 Years" in columns:
+        input_df.loc[0, "Vehicle_Age_> 2 Years"] = 1 if vehicle_age == "> 2 Years" else 0
+
+    # ✅ Step 4: Ensure correct column order (CRITICAL)
+    input_df = input_df[columns]
+
+    # ✅ Step 5: Prediction
     prob = model.predict_proba(input_df)[0][1]
     prediction = 1 if prob >= threshold else 0
 
-    # ---------------- OUTPUT ----------------
-    st.subheader("📊 Result")
-
-    st.metric(label="Probability of Response", value=f"{prob:.2f}")
+    # ✅ Step 6: Output
+    st.subheader("Result")
+    st.write(f"Probability: {prob:.2f}")
 
     if prediction == 1:
-        st.success("✅ Customer is LIKELY to respond")
+        st.success("Customer is likely to respond ✅")
     else:
-        st.error("❌ Customer is NOT likely to respond")
-
-    st.write(f"Threshold used: {threshold}")
+        st.error("Customer is not likely to respond ❌")
