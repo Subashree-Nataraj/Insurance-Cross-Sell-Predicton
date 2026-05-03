@@ -3,8 +3,8 @@ import pandas as pd
 import joblib
 
 # ---------------- LOAD MODEL ----------------
-model = joblib.load("../models/xgb_model.pkl")
-columns = joblib.load("../models/columns.pkl")
+model = joblib.load("models/xgb_model.pkl")
+columns = joblib.load("models/columns.pkl")
 
 st.set_page_config(page_title="Insurance Predictor", layout="wide")
 
